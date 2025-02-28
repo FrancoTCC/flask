@@ -1,0 +1,17 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches:
+      - main # Ejecutar cuando se haga push a la rama main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Usa un runner de Ubuntu
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build . -t ghcr.io/${{ github.repository_owner }}/flask-app:latest # Construye la imagen Docker
