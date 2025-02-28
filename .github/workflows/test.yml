@@ -28,7 +28,13 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin  # Login con el token GITHUB_TOKEN
 
       - name: Up Docker Container
-        run: docker build . -t ghcr.io/${{ github.repository_owner }}/flask-app:latest  # Construye la imagen Docker
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')  # Convierte el nombre del propietario a minúsculas
+          REPO_NAME=$(basename ${{ github.repository }})  # Obtiene el nombre del repositorio
+          docker build . -t ghcr.io/$OWNER/$REPO_NAME:latest  # Construye la imagen Docker
 
       - name: Push image
-        run: docker push ghcr.io/${{ github.repository_owner }}/flask-app:latest  # Sube la imagen al registro de contenedores
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')  # Convierte el nombre del propietario a minúsculas
+          REPO_NAME=$(basename ${{ github.repository }})  # Obtiene el nombre del repositorio
+          docker push ghcr.io/$OWNER/$REPO_NAME:latest  # Sube la imagen al registro de contenedores
