@@ -1,4 +1,4 @@
-name: Build Docker Image
+name: Build and Push Docker Image
 
 on:
   push:
@@ -8,13 +8,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest  # Usa un runner de Ubuntu
+    permissions:
+      contents: read  # Permiso para leer el repositorio
+      packages: write  # Permiso para subir imágenes a GitHub Container Registry
+    environment: produccion  # Puedes definir el entorno, por ejemplo, 'produccion'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2  # Obtiene el código del repositorio
+      - name: Checkout Repository
+        uses: actions/checkout@v4  # Obtiene el código del repositorio
+
+      - name: Login on GHCR
+        run: echo "${{ secrets.TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin  # Login al registro de contenedores de GitHub
 
       - name: Build Docker image
-        run: |
-          REPO_NAME=$(basename ${{ github.repository }})  # Obtiene el nombre del repositorio
-          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')  # Convierte el nombre del propietario a minúsculas
-          docker build . -t ghcr.io/$OWNER/$REPO_NAME:latest  # Construye la imagen Docker
+        run: docker build . -t ghcr.io/${{ github.repository_owner }}/flask-app:latest  # Construye la imagen Docker
+
+      - name: Push image
+        run: docker push ghcr.io/${{ github.repository_owner }}/flask-app:latest  # Sube la imagen al registro de contenedores
